@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,7 +22,10 @@ public class Task {
     private String status;
     private LocalDate dueDate;
 
-    
+    @ManyToOne
+    private User assignedUser;
+    @ManyToOne
+    private Project project;
     
     public Task() {
     }
