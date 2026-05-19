@@ -3,6 +3,8 @@ package com.teamworkspace.workspace_saas.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,6 +22,7 @@ public class User {
     private String email;
     private String password;
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public enum Role {
@@ -34,7 +37,12 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String firstName, String lastName, String email, String password, LocalDateTime createdAt, Role role) {
+
+
+    
+
+    public User(Long id, String firstName, String lastName, String email, String password, LocalDateTime createdAt,
+            Role role, Organization organization) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -42,7 +50,12 @@ public class User {
         this.password = password;
         this.createdAt = createdAt;
         this.role = role;
+        this.organization = organization;
     }
+
+
+
+
 
     public Long getId() {
         return id;
@@ -99,12 +112,26 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+    
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+
+
+
 
     @Override
     public String toString() {
         return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
-                + ", password=" + password + ", createdAt=" + createdAt + ", role=" + role + "]";
+                + ", createdAt=" + createdAt + ", role=" + role + "]";
     }
+
+    
 
     
 }
