@@ -32,6 +32,8 @@ public class ProjectService {
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt());
     }
 
+
+    
     public List<ProjectResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAll();
 

@@ -87,11 +87,30 @@ public class Task {
         this.dueDate = dueDate;
     }
 
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+    
+
     @Override
     public String toString() {
         return "Task [id=" + id + ", title=" + title + ", description=" + description + ", priority=" + priority
                 + ", status=" + status + ", dueDate=" + dueDate + "]";
     }
+
+    
 
     
 }
