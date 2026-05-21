@@ -56,10 +56,28 @@ public class Comment {
         this.createdAt = createdAt;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
+    
+
     @Override
     public String toString() {
         return "Comment [id=" + id + ", content=" + content + ", createdAt=" + createdAt + "]";
     }
+
 
 
     
