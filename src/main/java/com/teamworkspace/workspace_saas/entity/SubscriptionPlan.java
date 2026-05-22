@@ -13,16 +13,16 @@ public class SubscriptionPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Long price;
-    private Long maxUsers;
-    private Long maxProjects;
+    private Double price;
+    private Integer maxUsers;
+    private Integer maxProjects;
 
     
 
     public SubscriptionPlan() {
     }
 
-    public SubscriptionPlan(Long id, String name, Long price, Long maxUsers, Long maxProjects) {
+    public SubscriptionPlan(Long id, String name, Double price, Integer maxUsers, Integer maxProjects) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -46,27 +46,27 @@ public class SubscriptionPlan {
         this.name = name;
     }
 
-    public Long getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Long price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public Long getMaxUsers() {
+    public Integer getMaxUsers() {
         return maxUsers;
     }
 
-    public void setMaxUsers(Long maxUsers) {
+    public void setMaxUsers(Integer maxUsers) {
         this.maxUsers = maxUsers;
     }
 
-    public Long getMaxProjects() {
+    public Integer getMaxProjects() {
         return maxProjects;
     }
 
-    public void setMaxProjects(Long maxProjects) {
+    public void setMaxProjects(Integer maxProjects) {
         this.maxProjects = maxProjects;
     }
 

@@ -64,11 +64,21 @@ public class Organization {
         this.createdAt = createdAt;
     }
 
+    public SubscriptionPlan getSubscriptionPlan() {
+        return subscriptionPlan;
+    }
+
+    public void setSubscriptionPlan(SubscriptionPlan subscriptionPlan) {
+        this.subscriptionPlan = subscriptionPlan;
+    }
+
+
     @Override
     public String toString() {
         return "Organization [id=" + id + ", name=" + name + ", status=" + status + ", createdAt=" + createdAt + "]";
     }
 
+    
 
     
     

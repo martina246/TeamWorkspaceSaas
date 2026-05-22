@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationRequest {
+public class SubscriptionPlanRequest {
     private String name;
-    private String status;
-    private Long subscriptionPlanId;
+    private Double price;
+    private Integer maxUsers;
+    private Integer maxProjects;
 }

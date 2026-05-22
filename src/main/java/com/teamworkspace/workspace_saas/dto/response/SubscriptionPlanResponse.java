@@ -1,7 +1,5 @@
 package com.teamworkspace.workspace_saas.dto.response;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationResponse {
+public class SubscriptionPlanResponse {
     private Long id;
     private String name;
-    private String status;
-    private LocalDateTime createdAt;
-    private Long subscriptionPlanId;
-    private String subscriptionPlanName;
+    private Double price;
+    private Integer maxUsers;
+    private Integer maxProjects;
 }
