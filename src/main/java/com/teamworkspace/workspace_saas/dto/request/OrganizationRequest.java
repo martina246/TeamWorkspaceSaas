@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectRequest {
+public class OrganizationRequest {
     private String name;
-    private String description;
     private String status;
-    private Long organizationId;
 }

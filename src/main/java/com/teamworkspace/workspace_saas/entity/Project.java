@@ -74,11 +74,22 @@ public class Project {
         this.createdAt = createdAt;
     }
 
+     public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+
     @Override
     public String toString() {
         return "Project [id=" + id + ", name=" + name + ", description=" + description + ", status=" + status
                 + ", createdAt=" + createdAt + "]";
     }
+
+   
 
     
 }
