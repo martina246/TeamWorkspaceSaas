@@ -14,6 +14,8 @@ import com.teamworkspace.workspace_saas.dto.request.SubscriptionPlanRequest;
 import com.teamworkspace.workspace_saas.dto.response.SubscriptionPlanResponse;
 import com.teamworkspace.workspace_saas.service.SubscriptionPlanService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/subscription-plans")
 public class SubscriptionPlanController {
@@ -24,7 +26,7 @@ public class SubscriptionPlanController {
     }
 
     @PostMapping
-    public SubscriptionPlanResponse createSubscriptionPlan(@RequestBody SubscriptionPlanRequest request) {
+    public SubscriptionPlanResponse createSubscriptionPlan(@Valid @RequestBody SubscriptionPlanRequest request) {
         return subscriptionPlanService.createSubscriptionPlan(request);
     }
 
@@ -40,7 +42,7 @@ public class SubscriptionPlanController {
     }
 
     @PutMapping("/{id}")
-    public SubscriptionPlanResponse updateSubscriptionPlan(@PathVariable Long id, @RequestBody SubscriptionPlanRequest request) {
+    public SubscriptionPlanResponse updateSubscriptionPlan(@PathVariable Long id, @Valid @RequestBody SubscriptionPlanRequest request) {
         return subscriptionPlanService.updateSubscriptionPlan(id, request);
     }
 

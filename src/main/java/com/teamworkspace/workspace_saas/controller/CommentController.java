@@ -15,6 +15,8 @@ import com.teamworkspace.workspace_saas.dto.request.CommentRequest;
 import com.teamworkspace.workspace_saas.dto.response.CommentResponse;
 import com.teamworkspace.workspace_saas.service.CommentService;
 
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/comments")
@@ -26,7 +28,7 @@ public class CommentController {
     }
 
     @PostMapping
-    public CommentResponse createComment(@RequestBody CommentRequest request) {
+    public CommentResponse createComment(@Valid @RequestBody CommentRequest request) {
         return commentService.createComment(request);
     }
 
@@ -41,7 +43,7 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public CommentResponse updateComment(@PathVariable Long id, @RequestBody CommentRequest request) {
+    public CommentResponse updateComment(@PathVariable Long id,@Valid @RequestBody CommentRequest request) {
         return commentService.updateComment(id, request);
     }
 

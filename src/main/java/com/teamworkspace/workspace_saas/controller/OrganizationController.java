@@ -15,6 +15,8 @@ import com.teamworkspace.workspace_saas.dto.request.OrganizationRequest;
 import com.teamworkspace.workspace_saas.dto.response.OrganizationResponse;
 import com.teamworkspace.workspace_saas.service.OrganizationService;
 
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/organizations")
@@ -26,7 +28,7 @@ public class OrganizationController {
     }
 
     @PostMapping
-    public OrganizationResponse createOrganization(@RequestBody OrganizationRequest request) {
+    public OrganizationResponse createOrganization(@Valid @RequestBody OrganizationRequest request) {
         return organizationService.createOrganization(request);
     }
 
@@ -41,7 +43,7 @@ public class OrganizationController {
     }
 
     @PutMapping("/{id}")
-    public OrganizationResponse updateOrganization(@PathVariable Long id, @RequestBody OrganizationRequest request) {
+    public OrganizationResponse updateOrganization(@PathVariable Long id, @Valid @RequestBody OrganizationRequest request) {
         return organizationService.updateOrganization(id, request);
     }
 

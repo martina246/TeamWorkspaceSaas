@@ -15,6 +15,8 @@ import com.teamworkspace.workspace_saas.dto.request.ProjectRequest;
 import com.teamworkspace.workspace_saas.dto.response.ProjectResponse;
 import com.teamworkspace.workspace_saas.service.ProjectService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
@@ -25,7 +27,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectResponse createProject(@RequestBody ProjectRequest request) {
+    public ProjectResponse createProject(@Valid @RequestBody ProjectRequest request) {
         return projectService.createProject(request);
     }
 
@@ -41,7 +43,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ProjectResponse updateProject(@PathVariable Long id, @RequestBody ProjectRequest request) {
+    public ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectRequest request) {
         return projectService.updateProject(id, request);
     }
 

@@ -16,6 +16,8 @@ import com.teamworkspace.workspace_saas.dto.request.TaskRequest;
 import com.teamworkspace.workspace_saas.dto.response.TaskResponse;
 import com.teamworkspace.workspace_saas.service.TaskService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -26,7 +28,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public TaskResponse createTask(@RequestBody TaskRequest request) {
+    public TaskResponse createTask(@Valid @RequestBody TaskRequest request) {
         return taskService.createTask(request);
     }
 
@@ -42,7 +44,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public TaskResponse updateTask(@PathVariable Long id, @RequestBody TaskRequest request) {
+    public TaskResponse updateTask(@PathVariable Long id, @Valid @RequestBody TaskRequest request) {
         return taskService.updateTask(id, request);
     }
 
