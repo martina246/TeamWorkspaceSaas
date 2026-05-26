@@ -34,6 +34,19 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
+
+                .requestMatchers("/api/subscription-plans/**")
+                .hasRole("SUPERADMIN")
+
+                .requestMatchers("/api/organizations/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
+
+                .requestMatchers("/api/projects/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
+
+                .requestMatchers("/api/tasks/**")
+                .hasAnyRole("USER", "ADMIN", "SUPERADMIN")
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.disable())
