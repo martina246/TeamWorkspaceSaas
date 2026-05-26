@@ -9,22 +9,38 @@ import org.springframework.stereotype.Service;
 import com.teamworkspace.workspace_saas.dto.request.LoginRequest;
 import com.teamworkspace.workspace_saas.dto.request.RegisterRequest;
 import com.teamworkspace.workspace_saas.dto.response.AuthResponse;
+import com.teamworkspace.workspace_saas.entity.Organization;
 import com.teamworkspace.workspace_saas.entity.User;
 import com.teamworkspace.workspace_saas.entity.User.Role;
+import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.UserRepository;
+import com.teamworkspace.workspace_saas.security.JwtService;
 
 
 @Service
 public class AuthService {
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    
+
+    
+
+    public AuthService(UserRepository userRepository, OrganizationRepository organizationRepository,
+            PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public AuthResponse register(RegisterRequest request) {
+
+        Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
+
+        Organization organization = organizationOpt.orElseThrow();
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return new AuthResponse(null, "Email already exists", request.getEmail(), null);
@@ -37,6 +53,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
         user.setRole(Role.USER);
+        user.setOrganization(organization);
 
         userRepository.save(user);
 
@@ -56,8 +73,10 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return new AuthResponse(null, "Invalid email or password", request.getEmail(), null);
         }
+
+        String jwtToken = jwtService.generateToken(user);
         
-        return new AuthResponse(null, "Login successful", user.getEmail(), user.getRole().name());
+        return new AuthResponse(jwtToken, "Login successful", user.getEmail(), user.getRole().name());
 
 
         
