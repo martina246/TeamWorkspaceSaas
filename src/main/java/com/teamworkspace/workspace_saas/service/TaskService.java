@@ -11,6 +11,7 @@ import com.teamworkspace.workspace_saas.dto.response.TaskResponse;
 import com.teamworkspace.workspace_saas.entity.Project;
 import com.teamworkspace.workspace_saas.entity.Task;
 import com.teamworkspace.workspace_saas.entity.User;
+import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.ProjectRepository;
 import com.teamworkspace.workspace_saas.repository.TaskRepository;
 import com.teamworkspace.workspace_saas.repository.UserRepository;
@@ -33,10 +34,10 @@ public class TaskService {
 
     public TaskResponse createTask(TaskRequest request) {
         Optional<Project> projectOpt = projectRepository.findById(request.getProjectId());
-        Project project = projectOpt.orElseThrow();
+        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         Optional<User> userOpt = userRepository.findById(request.getAssignedUserId());
-        User user = userOpt.orElseThrow();
+        User user = userOpt.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Task task = new Task();
         task.setTitle(request.getTitle());
@@ -92,13 +93,8 @@ public class TaskService {
     public TaskResponse getTaskById(Long id) {
 
 
-        Optional<Task> taskOpt = taskRepository.findById(id);
 
-        if (!taskOpt.isPresent()) {
-            return new TaskResponse();
-        }
-
-        Task task = taskOpt.get();
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         return new TaskResponse(
             task.getId(),
@@ -115,13 +111,13 @@ public class TaskService {
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        Task task = taskOpt.orElseThrow();
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
         Optional<Project> projectOpt = projectRepository.findById(request.getProjectId());
-        Project project = projectOpt.orElseThrow();
+        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         Optional<User> userOpt = userRepository.findById(request.getAssignedUserId());
-        User user = userOpt.orElseThrow();
+        User user = userOpt.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -150,8 +146,7 @@ public class TaskService {
     }
 
     public String deleteTask(Long id) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        Task task = taskOpt.orElseThrow();
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         taskRepository.delete(task);
 

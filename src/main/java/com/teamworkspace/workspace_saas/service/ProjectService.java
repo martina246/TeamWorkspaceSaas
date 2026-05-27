@@ -11,6 +11,7 @@ import com.teamworkspace.workspace_saas.dto.request.ProjectRequest;
 import com.teamworkspace.workspace_saas.dto.response.ProjectResponse;
 import com.teamworkspace.workspace_saas.entity.Organization;
 import com.teamworkspace.workspace_saas.entity.Project;
+import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.ProjectRepository;
 
@@ -30,7 +31,7 @@ public class ProjectService {
 
     public ProjectResponse createProject(ProjectRequest request) {
         Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
-        Organization organization = organizationOpt.orElseThrow();
+        Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
 
         Project project = new Project();
         project.setName(request.getName());
@@ -76,20 +77,14 @@ public class ProjectService {
     public ProjectResponse getProjectById(Long id) {
 
 
-        Optional<Project> projectOpt = projectRepository.findById(id);
-
-        if (!projectOpt.isPresent()) {
-            return new ProjectResponse();
-        }
-
-        Project project = projectOpt.get();
+        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("..."));
 
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt(), project.getOrganization().getId(), project.getOrganization().getName());
     }
 
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
         Optional<Project> projectOpt = projectRepository.findById(id);
-        Project project = projectOpt.orElseThrow();
+        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
@@ -103,7 +98,7 @@ public class ProjectService {
 
     public String deleteProject(Long id) {
         Optional<Project> projectOpt = projectRepository.findById(id);
-        Project project = projectOpt.orElseThrow();
+        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
 
         projectRepository.delete(project);
 

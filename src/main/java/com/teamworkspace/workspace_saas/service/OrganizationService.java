@@ -11,6 +11,7 @@ import com.teamworkspace.workspace_saas.dto.request.OrganizationRequest;
 import com.teamworkspace.workspace_saas.dto.response.OrganizationResponse;
 import com.teamworkspace.workspace_saas.entity.Organization;
 import com.teamworkspace.workspace_saas.entity.SubscriptionPlan;
+import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.SubscriptionPlanRepository;
 
@@ -29,7 +30,7 @@ public class OrganizationService {
 
     public OrganizationResponse createOrganization(OrganizationRequest request) {
         Optional<SubscriptionPlan> subPlanOpt = subscriptionPlanRepository.findById(request.getSubscriptionPlanId());
-        SubscriptionPlan subscriptionPlan = subPlanOpt.orElseThrow();
+        SubscriptionPlan subscriptionPlan = subPlanOpt.orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
 
         Organization organization = new Organization();
         organization.setName(request.getName());
@@ -63,23 +64,19 @@ public class OrganizationService {
     }
 
     public OrganizationResponse getOrganizationById(Long id) {
-        Optional<Organization> organizationOpt = organizationRepository.findById(id);
 
-        if (!organizationOpt.isPresent()) {
-            return new OrganizationResponse();
-        }
-
-        Organization organization = organizationOpt.get();
+        Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         return new OrganizationResponse(organization.getId(), organization.getName(), organization.getStatus(), organization.getCreatedAt(), organization.getSubscriptionPlan().getId(), organization.getSubscriptionPlan().getName());
     }
 
+
     public OrganizationResponse updateOrganization(Long id, OrganizationRequest request) {
-        Optional<Organization> organizationOpt = organizationRepository.findById(id);
-        Organization organization = organizationOpt.orElseThrow();
+        
+        Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         Optional<SubscriptionPlan> subPlanOpt = subscriptionPlanRepository.findById(request.getSubscriptionPlanId());
-        SubscriptionPlan subscriptionPlan = subPlanOpt.orElseThrow();
+        SubscriptionPlan subscriptionPlan = subPlanOpt.orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
 
         organization.setName(request.getName());
         organization.setStatus(request.getStatus());
@@ -90,9 +87,10 @@ public class OrganizationService {
         return new OrganizationResponse(organization.getId(), organization.getName(), organization.getStatus(), organization.getCreatedAt(), organization.getSubscriptionPlan().getId(), organization.getSubscriptionPlan().getName());
     }
 
+
     public String deleteOrganization(Long id) {
-        Optional<Organization> organizationOpt = organizationRepository.findById(id);
-        Organization organization = organizationOpt.orElseThrow();
+        
+        Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         organizationRepository.delete(organization);
 

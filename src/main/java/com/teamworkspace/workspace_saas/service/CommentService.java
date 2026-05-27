@@ -12,6 +12,7 @@ import com.teamworkspace.workspace_saas.dto.response.CommentResponse;
 import com.teamworkspace.workspace_saas.entity.Comment;
 import com.teamworkspace.workspace_saas.entity.Task;
 import com.teamworkspace.workspace_saas.entity.User;
+import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.CommentRepository;
 import com.teamworkspace.workspace_saas.repository.TaskRepository;
 import com.teamworkspace.workspace_saas.repository.UserRepository;
@@ -31,10 +32,10 @@ public class CommentService {
 
     public CommentResponse createComment(CommentRequest request) {
         Optional<User> userOpt = userRepository.findById(request.getAuthorId());
-        User user = userOpt.orElseThrow();
+        User user = userOpt.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Optional<Task> taskOpt = taskRepository.findById(request.getTaskId());
-        Task task = taskOpt.orElseThrow();
+        Task task = taskOpt.orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         Comment comment = new Comment();
         comment.setContent(request.getContent());
@@ -75,13 +76,8 @@ public class CommentService {
     }
 
     public CommentResponse getCommentById(Long id) {
-        Optional<Comment> commentOpt = commentRepository.findById(id);
 
-        if (!commentOpt.isPresent()) {
-            return new CommentResponse();
-        }
-
-        Comment comment = commentOpt.get();
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 
         return new CommentResponse(
             comment.getId(),
@@ -94,8 +90,7 @@ public class CommentService {
 
     public CommentResponse updateComment(Long id, CommentRequest request) {
 
-        Optional<Comment> commentOpt = commentRepository.findById(id);
-        Comment comment = commentOpt.orElseThrow();
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 
 
         comment.setContent(request.getContent());
@@ -112,8 +107,8 @@ public class CommentService {
     }
 
     public String deleteComment(Long id) {
-        Optional<Comment> commentOpt = commentRepository.findById(id);
-        Comment comment = commentOpt.orElseThrow();
+        
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 
         commentRepository.delete(comment);
 

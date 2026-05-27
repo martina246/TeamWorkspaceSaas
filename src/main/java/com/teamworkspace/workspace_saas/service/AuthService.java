@@ -12,6 +12,7 @@ import com.teamworkspace.workspace_saas.dto.response.AuthResponse;
 import com.teamworkspace.workspace_saas.entity.Organization;
 import com.teamworkspace.workspace_saas.entity.User;
 import com.teamworkspace.workspace_saas.entity.User.Role;
+import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.UserRepository;
 import com.teamworkspace.workspace_saas.security.JwtService;
@@ -40,7 +41,7 @@ public class AuthService {
 
         Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
 
-        Organization organization = organizationOpt.orElseThrow();
+        Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return new AuthResponse(null, "Email already exists", request.getEmail(), null);
@@ -62,12 +63,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
 
-        if (!userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return new AuthResponse(null, "The user is not registered", request.getEmail(), null);
-        }
-        //znamo da Optional nije prazan (inace .orElseThrow())
-        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
-        User user = userOpt.get();
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
