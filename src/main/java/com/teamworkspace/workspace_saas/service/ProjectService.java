@@ -11,6 +11,8 @@ import com.teamworkspace.workspace_saas.dto.request.ProjectRequest;
 import com.teamworkspace.workspace_saas.dto.response.ProjectResponse;
 import com.teamworkspace.workspace_saas.entity.Organization;
 import com.teamworkspace.workspace_saas.entity.Project;
+import com.teamworkspace.workspace_saas.entity.User;
+import com.teamworkspace.workspace_saas.exception.ForbiddenException;
 import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.ProjectRepository;
@@ -20,18 +22,21 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final OrganizationRepository organizationRepository;
 
-    
+    private final CurrentUserService currentUserService;
 
-    public ProjectService(ProjectRepository projectRepository, OrganizationRepository organizationRepository) {
+
+    public ProjectService(ProjectRepository projectRepository, OrganizationRepository organizationRepository,
+            CurrentUserService currentUserService) {
         this.projectRepository = projectRepository;
         this.organizationRepository = organizationRepository;
+        this.currentUserService = currentUserService;
     }
 
 
 
     public ProjectResponse createProject(ProjectRequest request) {
         Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
-        Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
+        Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         Project project = new Project();
         project.setName(request.getName());
@@ -49,42 +54,78 @@ public class ProjectService {
 
     
     public List<ProjectResponse> getAllProjects() {
-        List<Project> projects = projectRepository.findAll();
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        if (currentUser.getRole() == User.Role.SUPERADMIN) {
+            List<Project> projects = projectRepository.findAll();
+
+            List<ProjectResponse> responses = new ArrayList<>();
+        
+            //mapping
+            //frontend treba listu DTOjeva,
+            //a ne listu entityja
+            for (Project project : projects) {
+                ProjectResponse response = new ProjectResponse(
+                    project.getId(),
+                    project.getName(),
+                    project.getDescription(),
+                    project.getStatus(),
+                    project.getCreatedAt(),
+                    project.getOrganization().getId(),
+                    project.getOrganization().getName()
+                );
+                responses.add(response);
+            }
+            return responses;
+        }
+
+        List<Project> projects = projectRepository.findByOrganizationId(currentUser.getOrganization().getId());
 
         List<ProjectResponse> responses = new ArrayList<>();
         
+            //mapping
+            //frontend treba listu DTOjeva,
+            //a ne listu entityja
+            for (Project project : projects) {
+                ProjectResponse response = new ProjectResponse(
+                    project.getId(),
+                    project.getName(),
+                    project.getDescription(),
+                    project.getStatus(),
+                    project.getCreatedAt(),
+                    project.getOrganization().getId(),
+                    project.getOrganization().getName()
+                );
+                responses.add(response);
+            }
+            return responses;
 
-        //mapping
-        //frontend treba listu DTOjeva,
-        //a ne listu entityja
-        for (Project project : projects) {
-            ProjectResponse response = new ProjectResponse(
-                project.getId(),
-                project.getName(),
-                project.getDescription(),
-                project.getStatus(),
-                project.getCreatedAt(),
-                project.getOrganization().getId(),
-                project.getOrganization().getName()
-            );
-
-            responses.add(response);
-        }
-
-        return responses;
+        
     }
 
     public ProjectResponse getProjectById(Long id) {
 
+        User currentUser = currentUserService.getCurrentUser();
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("..."));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !project.getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this project.");
+        }
 
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt(), project.getOrganization().getId(), project.getOrganization().getName());
     }
 
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
-        Optional<Project> projectOpt = projectRepository.findById(id);
-        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !project.getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this project.");
+        }
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
@@ -92,13 +133,21 @@ public class ProjectService {
 
         projectRepository.save(project);
 
+        
+
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt(), project.getOrganization().getId(), project.getOrganization().getName());
 
     }
 
     public String deleteProject(Long id) {
-        Optional<Project> projectOpt = projectRepository.findById(id);
-        Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("..."));
+        
+        User currentUser = currentUserService.getCurrentUser();
+
+        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !project.getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this project.");
+        }
 
         projectRepository.delete(project);
 

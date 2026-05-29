@@ -11,6 +11,7 @@ import com.teamworkspace.workspace_saas.dto.response.TaskResponse;
 import com.teamworkspace.workspace_saas.entity.Project;
 import com.teamworkspace.workspace_saas.entity.Task;
 import com.teamworkspace.workspace_saas.entity.User;
+import com.teamworkspace.workspace_saas.exception.ForbiddenException;
 import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
 import com.teamworkspace.workspace_saas.repository.ProjectRepository;
 import com.teamworkspace.workspace_saas.repository.TaskRepository;
@@ -21,16 +22,16 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final CurrentUserService currentUserService;
 
-    
 
     public TaskService(TaskRepository taskRepository, UserRepository userRepository,
-            ProjectRepository projectRepository) {
+            ProjectRepository projectRepository, CurrentUserService currentUserService) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.projectRepository = projectRepository;
+        this.currentUserService = currentUserService;
     }
-
 
     public TaskResponse createTask(TaskRequest request) {
         Optional<Project> projectOpt = projectRepository.findById(request.getProjectId());
@@ -66,35 +67,66 @@ public class TaskService {
     }
 
     public List<TaskResponse> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        if (currentUser.getRole() == User.Role.SUPERADMIN) {
+            List<Task> tasks = taskRepository.findAll();
+
+            List<TaskResponse> responses = new ArrayList<>();
+
+            for (Task task : tasks) {
+                TaskResponse response = new TaskResponse(
+                    task.getId(),
+                    task.getTitle(),
+                    task.getDescription(),
+                    task.getPriority(),
+                    task.getStatus(),
+                    task.getDueDate(),
+                    task.getAssignedUser().getId(),
+                    task.getAssignedUser().getEmail(),
+                    task.getProject().getId(),
+                    task.getProject().getName()
+                );
+                responses.add(response);
+            }
+
+            return responses;
+        }
+
+        List<Task> tasks = taskRepository.findByProjectOrganizationId(currentUser.getOrganization().getId());
 
         List<TaskResponse> responses = new ArrayList<>();
 
-        for (Task task : tasks) {
+        for (Task task : tasks) { 
             TaskResponse response = new TaskResponse(
-                task.getId(),
-                task.getTitle(),
-                task.getDescription(),
-                task.getPriority(),
-                task.getStatus(),
-                task.getDueDate(),
-                task.getAssignedUser().getId(),
-                task.getAssignedUser().getEmail(),
-                task.getProject().getId(),
-                task.getProject().getName()
-            );
-            responses.add(response);
-        }
+                    task.getId(),
+                    task.getTitle(),
+                    task.getDescription(),
+                    task.getPriority(),
+                    task.getStatus(),
+                    task.getDueDate(),
+                    task.getAssignedUser().getId(),
+                    task.getAssignedUser().getEmail(),
+                    task.getProject().getId(),
+                    task.getProject().getName()
+                );
 
+                responses.add(response);
+        }
         return responses;
-     
+
     }
 
     public TaskResponse getTaskById(Long id) {
 
-
+        User currentUser = currentUserService.getCurrentUser();
 
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !task.getProject().getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this task.");
+        }
 
         return new TaskResponse(
             task.getId(),
@@ -111,13 +143,19 @@ public class TaskService {
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
+
+        User currentUser = currentUserService.getCurrentUser();
+
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         Optional<Project> projectOpt = projectRepository.findById(request.getProjectId());
         Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
-        Optional<User> userOpt = userRepository.findById(request.getAssignedUserId());
-        User user = userOpt.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findById(request.getAssignedUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !task.getProject().getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this task.");
+        }
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -146,7 +184,14 @@ public class TaskService {
     }
 
     public String deleteTask(Long id) {
+
+        User currentUser = currentUserService.getCurrentUser();
+
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !task.getProject().getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this task.");
+        }
 
         taskRepository.delete(task);
 
