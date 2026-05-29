@@ -24,15 +24,18 @@ public class CommentService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
+    private final ActivityLogService activityLogService;
 
     
 
     public CommentService(CommentRepository commentRepository, TaskRepository taskRepository,
-            UserRepository userRepository, CurrentUserService currentUserService) {
+            UserRepository userRepository, CurrentUserService currentUserService,
+            ActivityLogService activityLogService) {
         this.commentRepository = commentRepository;
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.currentUserService = currentUserService;
+        this.activityLogService = activityLogService;
     }
 
     public CommentResponse createComment(CommentRequest request) {
@@ -49,6 +52,8 @@ public class CommentService {
         comment.setTask(task);
 
         Comment savedComment = commentRepository.save(comment);
+
+        activityLogService.logAction("CREATE_COMMENT", "Comment " + comment.getId() + " created");
 
         return new CommentResponse(
             savedComment.getId(),
@@ -137,6 +142,8 @@ public class CommentService {
 
         commentRepository.save(comment);
 
+        activityLogService.logAction("UPDATE_COMMENT", "Comment " + comment.getId() + " updated");
+
         return new CommentResponse(
             comment.getId(),
             comment.getContent(),
@@ -157,6 +164,8 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
+
+        activityLogService.logAction("DELETE_COMMENT", "Comment " + comment.getId() + " deleted");
 
         return "Comment deleted.";
     }

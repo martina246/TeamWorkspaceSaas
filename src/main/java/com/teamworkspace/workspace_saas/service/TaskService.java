@@ -23,14 +23,17 @@ public class TaskService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final CurrentUserService currentUserService;
+    private final ActivityLogService activityLogService;
 
 
     public TaskService(TaskRepository taskRepository, UserRepository userRepository,
-            ProjectRepository projectRepository, CurrentUserService currentUserService) {
+            ProjectRepository projectRepository, CurrentUserService currentUserService,
+            ActivityLogService activityLogService) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.projectRepository = projectRepository;
         this.currentUserService = currentUserService;
+        this.activityLogService = activityLogService;
     }
 
     public TaskResponse createTask(TaskRequest request) {
@@ -51,6 +54,8 @@ public class TaskService {
         task.setAssignedUser(user);
 
         Task savedTask = taskRepository.save(task);
+
+        activityLogService.logAction("CREATE_TASK", "Task " + task.getTitle() + " created");
 
         return new TaskResponse(
             savedTask.getId(),
@@ -170,6 +175,8 @@ public class TaskService {
 
         taskRepository.save(task);
 
+        activityLogService.logAction("UPDATE_TASK", "Task " + task.getTitle() + " updated");
+
         return new TaskResponse(task.getId(),
                 task.getTitle(),
                 task.getDescription(),
@@ -194,6 +201,8 @@ public class TaskService {
         }
 
         taskRepository.delete(task);
+
+        activityLogService.logAction("DELETE_TASK", "Task " + task.getTitle() + " deleted");
 
         return "Task deleted.";
     }

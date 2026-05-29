@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/tasks/**")
                 .hasAnyRole("USER", "ADMIN", "SUPERADMIN")
 
+                .requestMatchers("/api/activity-logs/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.disable())

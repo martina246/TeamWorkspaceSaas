@@ -59,11 +59,29 @@ public class ActivityLog {
         this.createdAt = createdAt;
     }
 
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "ActivityLog [id=" + id + ", action=" + action + ", description=" + description + ", createdAt="
                 + createdAt + "]";
     }
+
+    
 
     
 }

@@ -21,14 +21,15 @@ import com.teamworkspace.workspace_saas.repository.ProjectRepository;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final OrganizationRepository organizationRepository;
-
+    private final ActivityLogService activityLogService;
     private final CurrentUserService currentUserService;
 
 
     public ProjectService(ProjectRepository projectRepository, OrganizationRepository organizationRepository,
-            CurrentUserService currentUserService) {
+            ActivityLogService activityLogService, CurrentUserService currentUserService) {
         this.projectRepository = projectRepository;
         this.organizationRepository = organizationRepository;
+        this.activityLogService = activityLogService;
         this.currentUserService = currentUserService;
     }
 
@@ -47,6 +48,8 @@ public class ProjectService {
         project.setOrganization(organization);
 
         projectRepository.save(project);
+
+        activityLogService.logAction("CREATE_PROJECT", "Project " + project.getName() + " created");
 
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt(), project.getOrganization().getId(), project.getOrganization().getName());
     }
@@ -133,7 +136,7 @@ public class ProjectService {
 
         projectRepository.save(project);
 
-        
+        activityLogService.logAction("UPDATE_PROJECT", "Project " + project.getName() + " updated");
 
         return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getStatus(), project.getCreatedAt(), project.getOrganization().getId(), project.getOrganization().getName());
 
@@ -150,6 +153,8 @@ public class ProjectService {
         }
 
         projectRepository.delete(project);
+
+        activityLogService.logAction("DELETE_PROJECT", "Project " + project.getName() + " deleted");
 
         return "Project deleted.";
     }
