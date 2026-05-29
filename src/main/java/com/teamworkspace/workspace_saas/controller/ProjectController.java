@@ -15,8 +15,11 @@ import com.teamworkspace.workspace_saas.dto.request.ProjectRequest;
 import com.teamworkspace.workspace_saas.dto.response.ProjectResponse;
 import com.teamworkspace.workspace_saas.service.ProjectService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Projects", description = "Project management endpoints")
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
@@ -26,27 +29,31 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
+    @Operation(summary = "Create a new project")
     @PostMapping
     public ProjectResponse createProject(@Valid @RequestBody ProjectRequest request) {
         return projectService.createProject(request);
     }
 
+    @Operation(summary = "Get all projects")
     @GetMapping
     public List<ProjectResponse> getAllProjects() {
         return projectService.getAllProjects();
     }
 
-
+    @Operation(summary = "Get project by ID")
     @GetMapping("/{id}")
     public ProjectResponse getProjectById(@PathVariable Long id) {
         return projectService.getProjectById(id);
     }
 
+    @Operation(summary = "Update project")
     @PutMapping("/{id}")
     public ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectRequest request) {
         return projectService.updateProject(id, request);
     }
 
+    @Operation(summary = "Delete project")
     @DeleteMapping("/{id}")
     public String deleteProject(@PathVariable Long id) {
         return projectService.deleteProject(id);

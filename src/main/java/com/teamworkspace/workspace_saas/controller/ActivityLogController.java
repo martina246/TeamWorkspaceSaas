@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.teamworkspace.workspace_saas.dto.response.ActivityLogResponse;
 import com.teamworkspace.workspace_saas.service.ActivityLogService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "ActivityLog", description = "Activity log management endpoints")
 @RestController
 @RequestMapping("/api/activity-logs")
 public class ActivityLogController {
@@ -20,11 +24,13 @@ public class ActivityLogController {
         this.activityLogService = activityLogService;
     }
 
+    @Operation(summary = "Get all logs")
     @GetMapping
     public List<ActivityLogResponse> getAllLogs() {
         return activityLogService.getAllLogs();
     }
 
+    @Operation(summary = "Get log by ID")
     @GetMapping("/{id}")
     public ActivityLogResponse getLogById(@PathVariable Long id) {
         return activityLogService.getLogById(id);
