@@ -153,15 +153,16 @@ public class TaskService {
 
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
+        if (currentUser.getRole() != User.Role.SUPERADMIN && !task.getProject().getOrganization().getId().equals(currentUser.getOrganization().getId())) {
+            throw new ForbiddenException("You are not the owner of this task.");
+        }
+
         Optional<Project> projectOpt = projectRepository.findById(request.getProjectId());
         Project project = projectOpt.orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         User user = userRepository.findById(request.getAssignedUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() != User.Role.SUPERADMIN && !task.getProject().getOrganization().getId().equals(currentUser.getOrganization().getId())) {
-            throw new ForbiddenException("You are not the owner of this task.");
-        }
-
+    
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());

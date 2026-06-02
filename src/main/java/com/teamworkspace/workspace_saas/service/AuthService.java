@@ -25,9 +25,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    
 
-    
 
     public AuthService(UserRepository userRepository, OrganizationRepository organizationRepository,
             PasswordEncoder passwordEncoder, JwtService jwtService) {
