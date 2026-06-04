@@ -37,7 +37,20 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
 
-        Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        return new AuthResponse(
+            null,
+            "Email already exists",
+            request.getEmail(),
+            null
+        );
+    }
+
+        String email = request.getEmail();
+
+        String domain = email.substring(email.indexOf("@") + 1);
+
+        Optional<Organization> organizationOpt = organizationRepository.findByDomain(domain);
 
         Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 

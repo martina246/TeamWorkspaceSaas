@@ -50,26 +50,29 @@ public class AuthServiceTest {
     void register_shouldCreateUser_whenEmailDoesNotExist() {
         Organization organization = new Organization();
         organization.setId(1L);
-        organization.setName("Test Organization");
+        organization.setName("Rivian");
+        organization.setDomain("rivian.com");
 
         RegisterRequest request = new RegisterRequest(
             "Zivko",
             "Zivkovic",
-            "zivko@gmail.com",
-            "password123",
-            1L
+            "zivko@rivian.com",
+            "password123"
         );
 
-        when(organizationRepository.findById(1L)).thenReturn(Optional.of(organization));
+        when(userRepository.findByEmail("zivko@rivian.com"))
+            .thenReturn(Optional.empty());
 
-        when(userRepository.findByEmail("zivko@gmail.com")).thenReturn(Optional.empty());
+        when(organizationRepository.findByDomain("rivian.com"))
+            .thenReturn(Optional.of(organization));
 
-        when(passwordEncoder.encode("password123")).thenReturn("hashedPassword");
+        when(passwordEncoder.encode("password123"))
+            .thenReturn("hashedPassword");
 
         AuthResponse response = authService.register(request);
 
         assertEquals("Registration successful", response.getMessage());
-        assertEquals("zivko@gmail.com", response.getEmail());
+        assertEquals("zivko@rivian.com", response.getEmail());
         assertEquals("USER", response.getRole());
 
         verify(userRepository).save(any(User.class));
@@ -77,52 +80,50 @@ public class AuthServiceTest {
 
     @Test
     void register_shouldReturnError_whenEmailAlreadyExists() {
-        Organization organization = new Organization();
-        organization.setId(1L);
-        organization.setName("Test Organization");
-
         User user = new User();
-        user.setEmail("zivko@gmail.com");
+        user.setEmail("zivko@rivian.com");
 
         RegisterRequest request = new RegisterRequest(
             "Zivko",
             "Zivkovic",
-            "zivko@gmail.com",
-            "password123",
-            1L
+            "zivko@rivian.com",
+            "password123"
         );
 
-        when(organizationRepository.findById(1L)).thenReturn(Optional.of(organization));
-
-        when(userRepository.findByEmail("zivko@gmail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("zivko@rivian.com")).thenReturn(Optional.of(user));
 
         AuthResponse response = authService.register(request);
 
         assertEquals("Email already exists", response.getMessage());
-        assertEquals("zivko@gmail.com", response.getEmail());
+        assertEquals("zivko@rivian.com", response.getEmail());
         assertNull(response.getRole());
 
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void register_shouldThrowException_whenOrganizationDoesNotExist() {
-
+    void register_shouldThrowException_whenOrganizationDomainDoesNotExist() {
         RegisterRequest request = new RegisterRequest(
             "Zivko",
             "Zivkovic",
-            "zivko@gmail.com",
-            "password123",
-            1L
+            "zivko@unknown.com",
+            "password123"
         );
 
-        when(organizationRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("zivko@unknown.com"))
+            .thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> authService.register(request));
+        when(organizationRepository.findByDomain("unknown.com"))
+            .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class,
+            () -> authService.register(request)
+        );
 
         assertEquals("Organization not found", exception.getMessage());
 
-
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test

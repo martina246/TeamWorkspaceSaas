@@ -2,6 +2,7 @@ package com.teamworkspace.workspace_saas.integration;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,61 +32,66 @@ public class AuthIntegrationTest {
     @Autowired
     private OrganizationRepository organizationRepository;
 
+
     @Autowired
     private AuthService authService;
 
+    private Organization organization;
+
+    @BeforeEach
+    void setUp() {
+
+    organization = organizationRepository
+            .findByDomain("rivian.com")
+            .orElseGet(() -> {
+
+                Organization org = new Organization();
+                org.setName("Rivian");
+                org.setStatus("ACTIVE");
+                org.setDomain("rivian.com");
+                org.setCreatedAt(LocalDateTime.now());
+
+                return organizationRepository.save(org);
+            });
+        }
 
     @Test
     void register_shouldCreateUser() throws Exception {
+
         
-        Organization organization = new Organization();
-        organization.setName("Test Organization");
-        organization.setStatus("ACTIVE");
-        organization.setCreatedAt(LocalDateTime.now());
 
-        String email = "testuser_" + System.currentTimeMillis() + "@gmail.com";
-
-        Organization savedOrganization = organizationRepository.save(organization);
+        String email = "testuser_" + System.currentTimeMillis() + "@rivian.com";
 
         String requestBody = """
         {
             "firstName": "Test",
             "lastName": "User",
             "email": "%s",
-            "password": "password123",
-            "organizationId": %d
+            "password": "password123"
         }
-        """.formatted(email, savedOrganization.getId());
-
+        """.formatted(email);
 
         mockMvc.perform(post("/api/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(requestBody))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("Registration successful"))
-            .andExpect(jsonPath("$.email").value(email))
-            .andExpect(jsonPath("$.role").value("USER"));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Registration successful"))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
     void login_shouldReturnJwtToken() throws Exception {
 
-        Organization organization = new Organization();
-        organization.setName("Test Organization");
-        organization.setStatus("ACTIVE");
-        organization.setCreatedAt(LocalDateTime.now());
+        
 
-        Organization savedOrganization =
-                organizationRepository.save(organization);
-
-        String email = "loginuser_" + System.currentTimeMillis() + "@gmail.com";
+        String email = "loginuser_" + System.currentTimeMillis() + "@rivian.com";
 
         RegisterRequest registerRequest = new RegisterRequest(
-                "Test",
-                "User",
-                email,
-                "password123",
-                savedOrganization.getId()
+            "Test",
+            "User",
+            email,
+            "password123"
         );
 
         authService.register(registerRequest);

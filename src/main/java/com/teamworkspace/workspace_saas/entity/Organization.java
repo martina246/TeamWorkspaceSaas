@@ -2,6 +2,7 @@ package com.teamworkspace.workspace_saas.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,18 +20,28 @@ public class Organization {
     private String status;
     private LocalDateTime createdAt;
 
+    @Column(unique = true)
+    private String domain;
+
     @ManyToOne
     private SubscriptionPlan subscriptionPlan;
 
     public Organization() {
     }
 
-    public Organization(Long id, String name, String status, LocalDateTime createdAt) {
+    
+
+    public Organization(Long id, String name, String status, LocalDateTime createdAt, String domain,
+            SubscriptionPlan subscriptionPlan) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.createdAt = createdAt;
+        this.domain = domain;
+        this.subscriptionPlan = subscriptionPlan;
     }
+
+
 
     public Long getId() {
         return id;
@@ -64,6 +75,14 @@ public class Organization {
         this.createdAt = createdAt;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     public SubscriptionPlan getSubscriptionPlan() {
         return subscriptionPlan;
     }
@@ -73,6 +92,7 @@ public class Organization {
     }
 
 
+
     @Override
     public String toString() {
         return "Organization [id=" + id + ", name=" + name + ", status=" + status + ", createdAt=" + createdAt + "]";
@@ -80,6 +100,5 @@ public class Organization {
 
     
 
-    
-    
+
 }

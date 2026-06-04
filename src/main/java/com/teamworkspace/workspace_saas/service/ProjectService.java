@@ -3,7 +3,6 @@ package com.teamworkspace.workspace_saas.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -14,21 +13,18 @@ import com.teamworkspace.workspace_saas.entity.Project;
 import com.teamworkspace.workspace_saas.entity.User;
 import com.teamworkspace.workspace_saas.exception.ForbiddenException;
 import com.teamworkspace.workspace_saas.exception.ResourceNotFoundException;
-import com.teamworkspace.workspace_saas.repository.OrganizationRepository;
 import com.teamworkspace.workspace_saas.repository.ProjectRepository;
 
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final OrganizationRepository organizationRepository;
     private final ActivityLogService activityLogService;
     private final CurrentUserService currentUserService;
 
 
-    public ProjectService(ProjectRepository projectRepository, OrganizationRepository organizationRepository,
+    public ProjectService(ProjectRepository projectRepository,
             ActivityLogService activityLogService, CurrentUserService currentUserService) {
         this.projectRepository = projectRepository;
-        this.organizationRepository = organizationRepository;
         this.activityLogService = activityLogService;
         this.currentUserService = currentUserService;
     }
@@ -36,8 +32,8 @@ public class ProjectService {
 
 
     public ProjectResponse createProject(ProjectRequest request) {
-        Optional<Organization> organizationOpt = organizationRepository.findById(request.getOrganizationId());
-        Organization organization = organizationOpt.orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+        User currentUser = currentUserService.getCurrentUser();
+        Organization organization = currentUser.getOrganization();
 
         Project project = new Project();
         project.setName(request.getName());

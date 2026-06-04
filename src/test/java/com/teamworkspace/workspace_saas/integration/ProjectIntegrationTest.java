@@ -2,6 +2,7 @@ package com.teamworkspace.workspace_saas.integration;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,26 +39,37 @@ public class ProjectIntegrationTest {
     @Autowired
     private AuthService authService;
 
+    private Organization organization;
+
+    @BeforeEach
+    void setUp() {
+
+    organization = organizationRepository
+            .findByDomain("rivian.com")
+            .orElseGet(() -> {
+
+                Organization org = new Organization();
+                org.setName("Rivian");
+                org.setStatus("ACTIVE");
+                org.setDomain("rivian.com");
+                org.setCreatedAt(LocalDateTime.now());
+
+                return organizationRepository.save(org);
+            });
+}
+
     @Test
     void createProject_shouldCreateProject() throws Exception {
 
-        Organization organization = new Organization();
-        organization.setName("Test Organization");
-        organization.setStatus("ACTIVE");
-        organization.setCreatedAt(LocalDateTime.now());
 
-        Organization savedOrganization =
-                organizationRepository.save(organization);
-
-        String email = "projectuser_" + System.currentTimeMillis() + "@gmail.com";
+        String email = "projectuser_" + System.currentTimeMillis() + "@rivian.com";
 
         authService.register(
                 new RegisterRequest(
-                        "Admin",
-                        "User",
-                        email,
-                        "password123",
-                        savedOrganization.getId()
+                "Admin",
+                "User",
+                email,
+                "password123"
                 )
         );
 
@@ -71,40 +83,31 @@ public class ProjectIntegrationTest {
 
         String requestBody = """
         {
-            "name":"Integration Project",
-            "description":"Project created by integration test",
-            "status":"ACTIVE",
-            "organizationId": %d
+                "name": "Integration Project",
+                "description": "Project created by integration test",
+                "status": "ACTIVE"
         }
-        """.formatted(savedOrganization.getId());
+        """;
 
         mockMvc.perform(post("/api/projects")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk());
-    }
+        }
 
-    @Test
-    void getProjects_shouldReturnProjects() throws Exception {
+        @Test
+        void getProjects_shouldReturnProjects() throws Exception {
 
-        Organization organization = new Organization();
-        organization.setName("Test Organization");
-        organization.setStatus("ACTIVE");
-        organization.setCreatedAt(LocalDateTime.now());
 
-        Organization savedOrganization =
-                organizationRepository.save(organization);
-
-        String email = "projects_" + System.currentTimeMillis() + "@gmail.com";
+        String email = "projects_" + System.currentTimeMillis() + "@rivian.com";
 
         authService.register(
                 new RegisterRequest(
-                        "Admin",
-                        "User",
-                        email,
-                        "password123",
-                        savedOrganization.getId()
+                "Admin",
+                "User",
+                email,
+                "password123"
                 )
         );
 
@@ -119,5 +122,5 @@ public class ProjectIntegrationTest {
         mockMvc.perform(get("/api/projects")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
-    }
+        }
 }

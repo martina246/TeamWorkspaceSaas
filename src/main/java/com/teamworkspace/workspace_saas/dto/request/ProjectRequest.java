@@ -1,7 +1,6 @@
 package com.teamworkspace.workspace_saas.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +21,4 @@ public class ProjectRequest {
     @NotBlank(message = "Project status is required")
     private String status;
 
-    @NotNull(message = "Organization is required")
-    private Long organizationId;
 }

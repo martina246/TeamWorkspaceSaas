@@ -50,25 +50,6 @@ public class ProjectServiceTest {
     private ProjectService projectService;
 
     @Test
-    void createProject_shouldThrowException_whenOrganizationDoesNotExist() {
-
-        ProjectRequest request = new ProjectRequest(
-            "Veb sistemi 2",
-            "Java + Spring Boot aplication",
-            "In development",
-            1L
-        );
-
-        when(organizationRepository.findById(1L)).thenReturn(Optional.empty());
-
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> projectService.createProject(request));
-
-        assertEquals("Organization not found", exception.getMessage());
-
-        verify(projectRepository, never()).save(any(Project.class));
-    }
-
-    @Test
     void createProject_shouldCreateProject_whenRequestIsValid() {
         Organization organization = new Organization();
         organization.setId(1L);
@@ -77,12 +58,14 @@ public class ProjectServiceTest {
         ProjectRequest request = new ProjectRequest(
             "Veb sistemi 2",
             "Java + Spring Boot aplication",
-            "In development",
-            1L
+            "In development"
         );
 
-        when(organizationRepository.findById(1L)).thenReturn(Optional.of(organization));
+        User currentUser = new User();
+        currentUser.setRole(User.Role.ADMIN);
+        currentUser.setOrganization(organization);
 
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
 
         ProjectResponse response = projectService.createProject(request);
 
@@ -185,8 +168,7 @@ public class ProjectServiceTest {
         ProjectRequest request = new ProjectRequest(
             "New name",
             "New description",
-            "COMPLETED",
-            1L
+            "COMPLETED"
         );
 
         when(currentUserService.getCurrentUser())
@@ -226,8 +208,7 @@ public class ProjectServiceTest {
         ProjectRequest request = new ProjectRequest(
             "Updated project",
             "Updated description",
-            "Completed",
-            1L
+            "Completed"
         );
 
         when(currentUserService.getCurrentUser()).thenReturn(currentUser);
